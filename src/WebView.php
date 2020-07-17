@@ -9,7 +9,6 @@ use Yiisoft\Html\Html;
 use Yiisoft\View\Event\BodyBegin;
 use Yiisoft\View\Event\BodyEnd;
 use Yiisoft\View\Event\PageEnd;
-use Yiisoft\Yii\Web\Middleware\Csrf;
 
 /**
  * View represents a view object in the MVC pattern.
@@ -438,11 +437,17 @@ class WebView extends View
         if (!array_key_exists('urlMatcher', $this->getDefaultParameters())) {
             return null;
         }
+        if (array_key_exists('applicationParameters', $this->getDefaultParameters())) {
+            $applicationParameters = $this->getDefaultParameters()['applicationParameters'];
+            $csrfParameter = $applicationParameters->getCsrfParameter();
+        } else {
+            $csrfParameter = 'csrf_token';
+        }
 
         $urlMatcher = $this->getDefaultParameters()['urlMatcher'];
 
         return ($urlMatcher !== null && $urlMatcher->getLastMatchedRequest() !== null)
-            ? $urlMatcher->getLastMatchedRequest()->getAttribute(Csrf::REQUEST_NAME)
+            ? $urlMatcher->getLastMatchedRequest()->getAttribute($csrfParameter)
             : null;
     }
 
